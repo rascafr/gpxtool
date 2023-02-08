@@ -1,4 +1,4 @@
-import { runCommand } from './commands.js';
+import { runCommand } from "./lib/commands.js";
 
 const [ command, filepath, ...options ] = process.argv.slice(2);
 console.log('***** GPXTOOL *****');

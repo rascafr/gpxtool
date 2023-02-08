@@ -14,6 +14,8 @@ Still in work in progress, only tested on *Garmin Watch*'s GPX files through *Ga
 
 - `speedchange` is an experimental feature. It's working properly but any platform such as Strava will be able to consider you're cheating if the duration between GPS points is reduced. Furthermore, your friends are likely to be surprised seen you running a 10km race in less than 40 minutes.
 
+- `trim` removes all pauses from a given file. This means on platforms like Strava for instance, *elapsed time* would equal *moving time*.
+
 ## Installation
 
 You'll just need **Node.js 18**.
@@ -30,12 +32,14 @@ The tool provides a CLI that explains everything by itself.
 $ npm run start
 
 ***** GPXTOOL *****
+Started using command <help>
 Usage: npm start <command> <file> <option>
 Available commands:
  - info 
- - merge activity1.gpx activity2.gpx ... activityN.gpx
- - join  activity1.gpx activity2.gpx ... activityN.gpx joinDelay (seconds)
- - timechange HH:mm
- - speedchange 1...1000 (%)
- - help 
+ - trim 
+ - merge <activity1.gpx> <activity2.gpx> ... <activityN.gpx>
+ - join  <activity1.gpx> <activity2.gpx> ... <activityN.gpx> <joinDelay (seconds)>
+ - timechange <HH:mm>
+ - speedchange <1...1000 (%)>
+ - help
 ```
