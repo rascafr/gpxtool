@@ -20,6 +20,7 @@ The tool provides a CLI that explains everything by itself.
 $ npm run start
 
 ***** GPXTOOL *****
+Usage: npm start <command> <file> <option>
 Available commands:
  - info 
  - merge activity1.gpx activity2.gpx ... activityN.gpx
