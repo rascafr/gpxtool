@@ -8,20 +8,21 @@ const SPD_CHG_RANGE = { // in %
 
 const COMMANDS = {
     info: { usage: '' },
+    trim: { usage: '' },
     merge: {
-        usage: 'activity1.gpx activity2.gpx ... activityN.gpx',
+        usage: '<activity1.gpx> <activity2.gpx> ... <activityN.gpx>',
         nbParams: NB_PARAMS_INFINITE
     },
     join: {
-        usage: 'activity1.gpx activity2.gpx ... activityN.gpx joinDelay (seconds)',
+        usage: ' <activity1.gpx> <activity2.gpx> ... <activityN.gpx> <joinDelay (seconds)>',
         nbParams: NB_PARAMS_INFINITE
     },
     timechange: {
-        usage: 'HH:mm',
+        usage: '<HH:mm>',
         nbParams: 1
     },
     speedchange: {
-        usage: `${SPD_CHG_RANGE.min}...${SPD_CHG_RANGE.max} (%)`,
+        usage: `<${SPD_CHG_RANGE.min}...${SPD_CHG_RANGE.max} (%)>`,
         nbParams: 1
     },
     help: { usage: '' },
@@ -54,6 +55,23 @@ const FUNCTIONS = {
         console.log('Activity', name, '(' + type + ')', 'started at', wasStarting, 'and finished at', wasFinished);
         const [h, m, s] = hourToHHmmss(msToH(points[points.length - 1].time - points[0].time));
         console.log('Total duration is', h, 'hours,', m, 'minutes and', s, 'seconds (' + HHmmssStringify([h, m, s]) + ')');
+    },
+
+    trim: (filepath) => {
+        const { name, type, points } = parseGPXfile(filepath);
+        console.log('Trimming');
+        let lastTime = null;
+        let pauseCounter = 0;
+        points.forEach(({time}, pi) => {
+            if (lastTime) {
+                const diff = time.getTime() - lastTime.getTime();
+                if (diff > 1000) {
+                    pauseCounter++;
+                    console.log(pauseCounter, hourToHHmmss(msToH(diff)));
+                }
+            }
+            lastTime = time;
+        })
     },
 
     /**
@@ -226,6 +244,7 @@ function assertParams(filepath, options, nbRequiredParams) {
 
     // if nb params = MAX then options can be empty
     if (nbRequiredParams !== NB_PARAMS_INFINITE && nbRequiredParams !== options.length) {
+        console.error('Command requires', nbRequiredParams, 'parameters, got', options.length);
         runCommand(null);
         process.exit(-1);
     }
