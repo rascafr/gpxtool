@@ -31,7 +31,7 @@ Available commands:
 
 ### Before using it
 
-- `merge` is useful if you have a sport session divided into many activity. This will not delete relative time between activities *(e.g. cycling between 8:00 and 8:30 then 10:00 to 11:00 would result in a 3 hours cycling session, with 1.5 hours of moving time)*
+- `merge` is useful if you have a sport session divided into many activities. Please not that this will not delete relative time between activities *(e.g. cycling between 8:00 and 8:30 then 10:00 to 11:00 would result in a 3 hours cycling session, with 1.5 hours of moving time)*
 
 - `timechange` is a nice feature if you did a running workout at 3pm between two work meetings. Change it to 8:00, upload it to Strava, and your colleges won't call you a lazy person (nevertheless they might do the same). They might even admire your ability to have a real miracle morning.
 
