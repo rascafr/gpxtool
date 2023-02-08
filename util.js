@@ -25,8 +25,21 @@ export function HHmmssStringify(timeElms) {
     return timeElms.map(e => `${e}`.padStart(2, '0')).join(':');
 }
 
+export function timeStringify(time) {
+    // time.constructor.name === Date
+    return HHmmssStringify([
+        time.getHours(),
+        time.getMinutes(),
+        time.getSeconds()
+    ]);
+}
+
 export function msToH(ms) {
     return ms / 3600 / 1000;
+}
+
+export function sToH(s) {
+    return s / 3600;
 }
 
 export function hourToHHmmss(duration) {
