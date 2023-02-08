@@ -1,6 +1,10 @@
-import { fileExists, hourToHHmmss, parseGPXfile, pointsToGPXfile } from "./util.js";
+import { fileExists, HHmmssStringify, HHmmToValues, hourToHHmmss, isStrTimeWellFormatted, msToH, parseGPXfile, pointsToGPXfile } from "./util.js";
 
 const NB_PARAMS_INFINITE = Number.MAX_VALUE;
+const SPD_CHG_RANGE = { // in %
+    max: 1000, // x10
+    min: 1     // x0.01
+};
 
 const COMMANDS = {
     info: { usage: '' },
@@ -13,7 +17,7 @@ const COMMANDS = {
         nbParams: 1
     },
     speedchange: {
-        usage: '1...1000 (%)',
+        usage: `${SPD_CHG_RANGE.min}...${SPD_CHG_RANGE.max} (%)`,
         nbParams: 1
     },
     help: { usage: '' },
@@ -44,8 +48,8 @@ const FUNCTIONS = {
         const wasStarting = points[0].time.toTimeString().split(' ')[0];
         const wasFinished = points[points.length - 1].time.toTimeString().split(' ')[0];
         console.log('Activity', name, '(' + type + ')', 'started at', wasStarting, 'and finished at', wasFinished);
-        const [h, m, s] = hourToHHmmss((points[points.length - 1].time - points[0].time) / 3600 / 1000);
-        console.log('Total duration is', h, 'hours,', m, 'minutes and', s, 'seconds (' + h + ':' + m + ':' + s + ')');
+        const [h, m, s] = hourToHHmmss(msToH(points[points.length - 1].time - points[0].time));
+        console.log('Total duration is', h, 'hours,', m, 'minutes and', s, 'seconds (' + HHmmssStringify([h, m, s]) + ')');
     },
 
     /**
@@ -81,10 +85,13 @@ const FUNCTIONS = {
      * @param {*} filepath 
      * @param {*} options 
      */
-    timechange: (filepath, options) => {
-        const { name, type, points } = parseGPXfile(filepath);
-        const [ option ] = options;
-        const [ newHour, newMinute ] = option.split(':').map(x => parseInt(x, 10));
+    timechange: (filepath, [ option ]) => {
+        const { name, type, points } = parseGPXfile(filepath);  
+        if (!isStrTimeWellFormatted(option)) {
+            console.error('`timechange` parameter must respect HH:mm format.');
+            process.exit(-1);
+        }
+        const [ newHour, newMinute ] = HHmmToValues(option);
 
         const wasStarting = points[0].time.toTimeString().split(' ')[0];
         const wasFinished = points[points.length - 1].time.toTimeString().split(' ')[0];
@@ -110,10 +117,13 @@ const FUNCTIONS = {
      * @param {*} filepath 
      * @param {*} options 
      */
-    speedchange: (filepath, options) => {
+    speedchange: (filepath, [ option ]) => {
         const { name, type, points } = parseGPXfile(filepath);
-        const [ option ] = options;
         const ratio = parseInt(option, 10) / 100; // 100 = same speed
+        if (!(ratio >= SPD_CHG_RANGE.min / 100 && ratio <= SPD_CHG_RANGE.max / 100)) {
+            console.error(`\`speedchange\` parameter must respect range ${SPD_CHG_RANGE.min}...${SPD_CHG_RANGE.max} (%)`);
+            process.exit(-1);
+        }
 
         // 100 = end - start in ms
         // 200 = 0.5 * duration
@@ -130,8 +140,8 @@ const FUNCTIONS = {
         const nowStarting = points[0].time.toTimeString().split(' ')[0];
         const nowFinished = points[points.length - 1].time.toTimeString().split(' ')[0];
         console.log('Activity now started at', nowStarting, 'and finished at', nowFinished);
-        const [h, m, s] = hourToHHmmss((points[points.length - 1].time - points[0].time) / 3600 / 1000);
-        console.log('New duration is now', h, 'hours,', m, 'minutes and', s, 'seconds (' + h + ':' + m + ':' + s + ')');
+        const [h, m, s] = hourToHHmmss(msToH(points[points.length - 1].time - points[0].time));
+        console.log('New duration is now', h, 'hours,', m, 'minutes and', s, 'seconds (' + HHmmssStringify([h, m, s]) + ')');
 
         pointsToGPXfile(filepath, name, type, points);
     },
@@ -155,7 +165,7 @@ function assertParams(filepath, options, nbRequiredParams) {
     }
 
     // if nb params = MAX then options can be empty
-    if (nbRequiredParams !== Number.MAX_VALUE && nbRequiredParams !== options.length) {
+    if (nbRequiredParams !== NB_PARAMS_INFINITE && nbRequiredParams !== options.length) {
         runCommand(null);
         process.exit(-1);
     }

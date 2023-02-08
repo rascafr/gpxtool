@@ -9,6 +9,26 @@ export function pathResolve(filepath) {
     return path.parse(filepath);
 }
 
+export function isStrTimeWellFormatted(time) {
+    return /[0-9]{1,2}:[0-9]{1,2}/.test(time);
+}
+
+export function HHmmToValues(time) {
+    return time.split(':').map(x => parseInt(x, 10));
+}
+
+/**
+ * Stringify into HH:mm:ss a [h, m, s] array
+ * @param {*} timeElms as a [h, m, s] array
+ */
+export function HHmmssStringify(timeElms) {
+    return timeElms.map(e => `${e}`.padStart(2, '0')).join(':');
+}
+
+export function msToH(ms) {
+    return ms / 3600 / 1000;
+}
+
 export function hourToHHmmss(duration) {
     const h = Math.floor(duration);
     const _m = (duration - h) * 60;
